@@ -22,6 +22,8 @@
 #ifndef ZEND_GC_H
 #define ZEND_GC_H
 
+#include "zend_operators.h"
+
 #ifndef GC_BENCH
 # define GC_BENCH 0
 #endif
@@ -179,7 +181,7 @@ END_EXTERN_C()
 
 static zend_always_inline void gc_zval_check_possible_root(zval *z TSRMLS_DC)
 {
-	if (z->type == IS_ARRAY || z->type == IS_OBJECT) {
+	if (Z_TYPE_P(z) == IS_ARRAY || Z_TYPE_P(z) == IS_OBJECT) {
 		gc_zval_possible_root(z TSRMLS_CC);
 	}
 }

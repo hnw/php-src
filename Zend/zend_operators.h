@@ -338,8 +338,8 @@ ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
 ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2);
 ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2);
-#define convert_to_cstring(op) if ((op)->type != IS_STRING) { _convert_to_cstring((op) ZEND_FILE_LINE_CC); }
-#define convert_to_string(op) if ((op)->type != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }
+#define convert_to_cstring(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_cstring((op) ZEND_FILE_LINE_CC); }
+#define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }
 
 ZEND_API double zend_string_to_double(const char *number, zend_uint length);
 
@@ -482,7 +482,11 @@ END_EXTERN_C()
 #define Z_OBJ_HANDLER_PP(zval_p, h)		Z_OBJ_HANDLER(**zval_p, h)
 #define Z_OBJDEBUG_PP(zval_pp,is_tmp)	Z_OBJDEBUG(**zval_pp,is_tmp)
 
-#define Z_TYPE(zval)		(zval).type
+#ifdef WORDS_BIGENDIAN
+#define Z_TYPE(zval)		((zval).typeinfo.var[3])
+#else
+#define Z_TYPE(zval)		((zval).typeinfo.var[0])
+#endif
 #define Z_TYPE_P(zval_p)	Z_TYPE(*zval_p)
 #define Z_TYPE_PP(zval_pp)	Z_TYPE(**zval_pp)
 
@@ -500,8 +504,13 @@ ZEND_API void zend_update_current_locale(void);
 #endif
 
 /* The offset in bytes between the value and type fields of a zval */
+#ifdef WORDS_BIGENDIAN
 #define ZVAL_OFFSETOF_TYPE	\
-	(offsetof(zval,type) - offsetof(zval,value))
+	(offsetof(zval,typeinfo.var[3]) - offsetof(zval,value))
+#else
+#define ZVAL_OFFSETOF_TYPE	\
+	(offsetof(zval,typeinfo.var[0]) - offsetof(zval,value))
+#endif
 
 static zend_always_inline int fast_increment_function(zval *op1)
 {

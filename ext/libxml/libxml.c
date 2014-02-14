@@ -1150,7 +1150,7 @@ PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object TSRMLS_DC)
 	xmlNodePtr node = NULL;
 	php_libxml_func_handler *export_hnd;
 
-	if (object->type == IS_OBJECT) {
+	if (Z_TYPE_P(object) == IS_OBJECT) {
 		ce = Z_OBJCE_P(object);
 		while (ce->parent != NULL) {
 			ce = ce->parent;

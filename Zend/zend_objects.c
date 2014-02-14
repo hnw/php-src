@@ -205,7 +205,7 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_va
 		zval *new_obj;
 
 		MAKE_STD_ZVAL(new_obj);
-		new_obj->type = IS_OBJECT;
+		Z_TYPE_P(new_obj) = IS_OBJECT;
 		new_obj->value.obj = new_obj_val;
 		zval_copy_ctor(new_obj);
 

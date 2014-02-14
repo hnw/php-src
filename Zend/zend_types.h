@@ -52,11 +52,11 @@ typedef unsigned long zend_uintptr_t;
 
 typedef unsigned int zend_object_handle;
 typedef struct _zend_object_handlers zend_object_handlers;
-typedef struct _zval_struct zval;
+typedef union _zval_struct zval;
 
 typedef struct _zend_object_value {
-	zend_object_handle handle;
 	const zend_object_handlers *handlers;
+	zend_object_handle handle;
 } zend_object_value;
 
 #endif /* ZEND_TYPES_H */

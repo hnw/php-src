@@ -4529,7 +4529,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 		return;
 	}
 
-	switch(class_name->type) {
+	switch(Z_TYPE_P(class_name)) {
 		case IS_STRING:
 			if (zend_lookup_class(Z_STRVAL_P(class_name), Z_STRLEN_P(class_name), &pce TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
@@ -4574,7 +4574,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 		return;
 	}
 
-	switch(interface->type) {
+	switch(Z_TYPE_P(interface)) {
 		case IS_STRING:
 			if (zend_lookup_class(Z_STRVAL_P(interface), Z_STRLEN_P(interface), &pce TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,

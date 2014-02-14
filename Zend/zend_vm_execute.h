@@ -673,7 +673,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STRING_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	tmp->value.str.val[0] = 0;
 	tmp->value.str.len = 0;
 	Z_SET_REFCOUNT_P(tmp, 1);
-	tmp->type = IS_STRING;
+	Z_TYPE_P(tmp) = IS_STRING;
 	Z_UNSET_ISREF_P(tmp);
 	/*CHECK_EXCEPTION();*/
 	ZEND_VM_NEXT_OPCODE();
@@ -2649,7 +2649,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 	SAVE_OPLINE();
 	inc_filename = opline->op1.zv;
 
-	if (inc_filename->type!=IS_STRING) {
+	if (Z_TYPE_P(inc_filename) != IS_STRING) {
 		MAKE_STD_ZVAL(tmp_inc_filename);
 		ZVAL_COPY_VALUE(tmp_inc_filename, inc_filename);
 		zval_copy_ctor(tmp_inc_filename);
@@ -7954,7 +7954,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 	SAVE_OPLINE();
 	inc_filename = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-	if (inc_filename->type!=IS_STRING) {
+	if (Z_TYPE_P(inc_filename) != IS_STRING) {
 		MAKE_STD_ZVAL(tmp_inc_filename);
 		ZVAL_COPY_VALUE(tmp_inc_filename, inc_filename);
 		zval_copy_ctor(tmp_inc_filename);
@@ -13271,7 +13271,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 	SAVE_OPLINE();
 	inc_filename = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-	if (inc_filename->type!=IS_STRING) {
+	if (Z_TYPE_P(inc_filename) != IS_STRING) {
 		MAKE_STD_ZVAL(tmp_inc_filename);
 		ZVAL_COPY_VALUE(tmp_inc_filename, inc_filename);
 		zval_copy_ctor(tmp_inc_filename);
@@ -30865,7 +30865,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 	SAVE_OPLINE();
 	inc_filename = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
-	if (inc_filename->type!=IS_STRING) {
+	if (Z_TYPE_P(inc_filename) != IS_STRING) {
 		MAKE_STD_ZVAL(tmp_inc_filename);
 		ZVAL_COPY_VALUE(tmp_inc_filename, inc_filename);
 		zval_copy_ctor(tmp_inc_filename);

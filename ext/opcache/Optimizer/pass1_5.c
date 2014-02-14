@@ -170,7 +170,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 
 					ZEND_OP2_LITERAL(opline).value.str.val = ptr;
 					ptr[0] = chval;
-					ZEND_OP2_LITERAL(opline).type = IS_STRING;
+					Z_TYPE(ZEND_OP2_LITERAL(opline)) = IS_STRING;
 					opline->opcode = ZEND_ADD_STRING;
 					ptr++;
 				} else { /* ZEND_ADD_STRING */
@@ -232,7 +232,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 
 			if (ZEND_OP1_TYPE(opline) == IS_UNUSED &&
 				ZEND_OP2_TYPE(opline) == IS_CONST &&
-				ZEND_OP2_LITERAL(opline).type == IS_STRING) {
+				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
 				/* substitute persistent constants */
 				zend_uint tv = ZEND_RESULT(opline).var;
 				zval c;

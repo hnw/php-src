@@ -98,9 +98,9 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 	START_SIZE();
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-	switch (z->type & IS_CONSTANT_TYPE_MASK) {
+	switch (Z_TYPE_P(z) & IS_CONSTANT_TYPE_MASK) {
 #else
-	switch (z->type & ~IS_CONSTANT_INDEX) {
+	switch (Z_TYPE_P(z) & ~IS_CONSTANT_INDEX) {
 #endif
 		case IS_STRING:
 		case IS_CONSTANT:

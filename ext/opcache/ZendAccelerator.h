@@ -143,14 +143,14 @@ extern int lock_file;
 	#define PZ_UNSET_ISREF_P(pz)			Z_SET_ISREF_TO_P(pz, 0)
 	#define PZ_SET_ISREF_TO_P(pz, isref)	(pz)->is_ref = (isref)
 #else
-	#define PZ_REFCOUNT_P(pz)				(pz)->refcount__gc
-	#define PZ_SET_REFCOUNT_P(pz, v)		(pz)->refcount__gc = (v)
-	#define PZ_ADDREF_P(pz)					++((pz)->refcount__gc)
-	#define PZ_DELREF_P(pz)					--((pz)->refcount__gc)
-	#define PZ_ISREF_P(pz)					(pz)->is_ref__gc
-	#define PZ_SET_ISREF_P(pz)				Z_SET_ISREF_TO_P(pz, 1)
-	#define PZ_UNSET_ISREF_P(pz)			Z_SET_ISREF_TO_P(pz, 0)
-	#define PZ_SET_ISREF_TO_P(pz, isref)	(pz)->is_ref__gc = (isref)
+	#define PZ_REFCOUNT_P(pz)				(pz)->refinfo.refcount__gc
+	#define PZ_SET_REFCOUNT_P(pz, v)		(pz)->refinfo.refcount__gc = (v)
+	#define PZ_ADDREF_P(pz)					++((pz)->refinfo.refcount__gc)
+	#define PZ_DELREF_P(pz)					--((pz)->refinfo.refcount__gc)
+	#define PZ_ISREF_P(pz)					(pz)->refinfo.refcount__gc & 0x00800000
+	#define PZ_SET_ISREF_P(pz)				(pz)->refinfo.refcount__gc |= 0x00800000
+	#define PZ_UNSET_ISREF_P(pz)			(pz)->refinfo.refcount__gc &= 0xff7fffff
+	#define PZ_SET_ISREF_TO_P(pz, isref)	(isref ? PZ_SET_ISREF_P(pz) : PZ_UNSET_ISREF_P(pz))
 #endif
 
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO

@@ -203,8 +203,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 	} else {
 plain_var:
 		MAKE_STD_ZVAL(gpc_element);
-		gpc_element->value = val->value;
-		Z_TYPE_P(gpc_element) = Z_TYPE_P(val);
+		ZVAL_COPY_VALUE(gpc_element, val);
 		if (!index) {
 			if (zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p) == FAILURE) {
 				zval_ptr_dtor(&gpc_element);

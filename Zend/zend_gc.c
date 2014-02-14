@@ -139,7 +139,7 @@ ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC)
 		return;
 	}
 
-	if (zv->type == IS_OBJECT) {
+	if (Z_TYPE_P(zv) == IS_OBJECT) {
 		GC_ZOBJ_CHECK_POSSIBLE_ROOT(zv);
 		return;
 	}
@@ -162,9 +162,9 @@ ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC)
 					GC_ZVAL_SET_BLACK(zv);
 					return;
 				}
-				zv->refcount__gc++;
+				Z_ADDREF_P(zv);
 				gc_collect_cycles(TSRMLS_C);
-				zv->refcount__gc--;
+				Z_DELREF_P(zv);
 				newRoot = GC_G(unused);
 				if (!newRoot) {
 					return;
@@ -217,9 +217,9 @@ ZEND_API void gc_zobj_possible_root(zval *zv TSRMLS_DC)
 					GC_ZVAL_SET_BLACK(zv);
 					return;
 				}
-				zv->refcount__gc++;
+				Z_ADDREF_P(zv);
 				gc_collect_cycles(TSRMLS_C);
-				zv->refcount__gc--;
+				Z_DELREF_P(zv);
 				newRoot = GC_G(unused);
 				if (!newRoot) {
 					return;
@@ -292,7 +292,7 @@ tail_call:
 					if (table[i]) {
 						pz = table[i];
 						if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
-							pz->refcount__gc++;
+							Z_ADDREF_P(pz);
 						}
 						if (GC_ZVAL_GET_COLOR(pz) != GC_BLACK) {
 							if (!props && i == n - 1) {
@@ -317,7 +317,7 @@ tail_call:
 	while (p != NULL) {
 		pz = *(zval**)p->pData;
 		if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
-			pz->refcount__gc++;
+			Z_ADDREF_P(pz);
 		}
 		if (GC_ZVAL_GET_COLOR(pz) != GC_BLACK) {
 			if (p->pListNext == NULL) {
@@ -346,7 +346,7 @@ static void zobj_scan_black(struct _store_object *obj, zval *pz TSRMLS_DC)
 			if (table[i]) {
 				pz = table[i];
 				if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
-					pz->refcount__gc++;
+					Z_ADDREF_P(pz);
 				}
 				if (GC_ZVAL_GET_COLOR(pz) != GC_BLACK) {
 					zval_scan_black(pz TSRMLS_CC);
@@ -360,7 +360,7 @@ static void zobj_scan_black(struct _store_object *obj, zval *pz TSRMLS_DC)
 		while (p != NULL) {
 			pz = *(zval**)p->pData;
 			if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
-				pz->refcount__gc++;
+				Z_ADDREF_P(pz);
 			}
 			if (GC_ZVAL_GET_COLOR(pz) != GC_BLACK) {
 				zval_scan_black(pz TSRMLS_CC);
@@ -399,7 +399,7 @@ tail_call:
 						if (table[i]) {
 							pz = table[i];
 							if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
-								pz->refcount__gc--;
+								Z_DELREF_P(pz);
 							}
 							if (!props && i == n - 1) {
 								goto tail_call;
@@ -424,7 +424,7 @@ tail_call:
 		while (p != NULL) {
 			pz = *(zval**)p->pData;
 			if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
-				pz->refcount__gc--;
+				Z_DELREF_P(pz);
 			}
 			if (p->pListNext == NULL) {
 				goto tail_call;
@@ -454,7 +454,7 @@ static void zobj_mark_grey(struct _store_object *obj, zval *pz TSRMLS_DC)
 				if (table[i]) {
 					pz = table[i];
 					if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
-						pz->refcount__gc--;
+						Z_DELREF_P(pz);
 					}
 					zval_mark_grey(pz TSRMLS_CC);
 				}
@@ -466,7 +466,7 @@ static void zobj_mark_grey(struct _store_object *obj, zval *pz TSRMLS_DC)
 			while (p != NULL) {
 				pz = *(zval**)p->pData;
 				if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
-					pz->refcount__gc--;
+					Z_DELREF_P(pz);
 				}
 				zval_mark_grey(pz TSRMLS_CC);
 				p = p->pListNext;
@@ -515,7 +515,7 @@ static void zval_scan(zval *pz TSRMLS_DC)
 tail_call:	
 	if (GC_ZVAL_GET_COLOR(pz) == GC_GREY) {
 		p = NULL;
-		if (pz->refcount__gc > 0) {
+		if (Z_REFCOUNT_P(pz) > 0) {
 			zval_scan_black(pz TSRMLS_CC);
 		} else {
 			GC_ZVAL_SET_COLOR(pz, GC_WHITE);
@@ -655,7 +655,7 @@ tail_call:
 
 					if (!props) {
 						/* restore refcount and put into list to free */
-						pz->refcount__gc++;
+						Z_ADDREF_P(pz);
 						((zval_gc_info*)pz)->u.next = GC_G(zval_to_free);
 						GC_G(zval_to_free) = (zval_gc_info*)pz;
 					}
@@ -665,7 +665,7 @@ tail_call:
 						if (table[i]) {
 							zv = table[i];
 							if (Z_TYPE_P(zv) != IS_ARRAY || Z_ARRVAL_P(zv) != &EG(symbol_table)) {
-								zv->refcount__gc++;
+								Z_ADDREF_P(zv);
 							}
 							if (!props && i == n - 1) {
 								pz = zv;
@@ -688,14 +688,14 @@ tail_call:
 		}
 
 		/* restore refcount and put into list to free */
-		pz->refcount__gc++;
+		Z_ADDREF_P(pz);
 		((zval_gc_info*)pz)->u.next = GC_G(zval_to_free);
 		GC_G(zval_to_free) = (zval_gc_info*)pz;
 
 		while (p != NULL) {
 			pz = *(zval**)p->pData;
 			if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
-				pz->refcount__gc++;
+				Z_ADDREF_P(pz);
 			}
 			if (p->pListNext == NULL) {
 				goto tail_call;
@@ -729,7 +729,7 @@ static void zobj_collect_white(zval *pz TSRMLS_DC)
 					if (table[i]) {
 						pz = table[i];
 						if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
-							pz->refcount__gc++;
+							Z_ADDREF_P(pz);
 						}
 						zval_collect_white(pz TSRMLS_CC);
 					}
@@ -741,7 +741,7 @@ static void zobj_collect_white(zval *pz TSRMLS_DC)
 				while (p != NULL) {
 					pz = *(zval**)p->pData;
 					if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
-						pz->refcount__gc++;
+						Z_ADDREF_P(pz);
 					}
 					zval_collect_white(pz TSRMLS_CC);
 					p = p->pListNext;

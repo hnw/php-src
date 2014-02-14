@@ -562,7 +562,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 	zend_bool original_in_compilation = CG(in_compilation);
 
 	retval_znode.op_type = IS_CONST;
-	retval_znode.u.constant.type = IS_LONG;
+	Z_TYPE(retval_znode.u.constant) = IS_LONG;
 	retval_znode.u.constant.value.lval = 1;
 	Z_UNSET_ISREF(retval_znode.u.constant);
 	Z_SET_REFCOUNT(retval_znode.u.constant, 1);
@@ -616,7 +616,7 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 	zend_op_array *retval;
 	char *opened_path = NULL;
 
-	if (filename->type != IS_STRING) {
+	if (Z_TYPE_P(filename) != IS_STRING) {
 		tmp = *filename;
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
@@ -1185,7 +1185,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 	return T_WHITESPACE;
 }
@@ -1197,7 +1197,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_LOOKING_FOR_PROPERTY>{LABEL} {
 	yy_pop_state(TSRMLS_C);
 	zend_copy_value(zendlval, yytext, yyleng);
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	return T_STRING;
 }
 
@@ -1480,7 +1480,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_LOOKING_FOR_VARNAME>{LABEL}[[}] {
 	yyless(yyleng - 1);
 	zend_copy_value(zendlval, yytext, yyleng);
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	yy_pop_state(TSRMLS_C);
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	return T_STRING_VARNAME;
@@ -1510,11 +1510,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		} else {
 			zendlval->value.lval = strtol(bin, NULL, 2);
 		}
-		zendlval->type = IS_LONG;
+		Z_TYPE_P(zendlval) = IS_LONG;
 		return T_LNUMBER;
 	} else {
 		zendlval->value.dval = zend_bin_strtod(bin, NULL);
-		zendlval->type = IS_DOUBLE;
+		Z_TYPE_P(zendlval) = IS_DOUBLE;
 		return T_DNUMBER;
 	}
 }
@@ -1531,12 +1531,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			} else {
 				zendlval->value.dval = zend_strtod(yytext, NULL);
 			}
-			zendlval->type = IS_DOUBLE;
+			Z_TYPE_P(zendlval) = IS_DOUBLE;
 			return T_DNUMBER;
 		}
 	}
 
-	zendlval->type = IS_LONG;
+	Z_TYPE_P(zendlval) = IS_LONG;
 	return T_LNUMBER;
 }
 
@@ -1556,11 +1556,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		} else {
 			zendlval->value.lval = strtol(hex, NULL, 16);
 		}
-		zendlval->type = IS_LONG;
+		Z_TYPE_P(zendlval) = IS_LONG;
 		return T_LNUMBER;
 	} else {
 		zendlval->value.dval = zend_hex_strtod(hex, NULL);
-		zendlval->type = IS_DOUBLE;
+		Z_TYPE_P(zendlval) = IS_DOUBLE;
 		return T_DNUMBER;
 	}
 }
@@ -1568,11 +1568,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_VAR_OFFSET>[0]|([1-9][0-9]*) { /* Offset could be treated as a long */
 	if (yyleng < MAX_LENGTH_OF_LONG - 1 || (yyleng == MAX_LENGTH_OF_LONG - 1 && strcmp(yytext, long_min_digits) < 0)) {
 		zendlval->value.lval = strtol(yytext, NULL, 10);
-		zendlval->type = IS_LONG;
+		Z_TYPE_P(zendlval) = IS_LONG;
 	} else {
 		zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
+		Z_TYPE_P(zendlval) = IS_STRING;
 	}
 	return T_NUM_STRING;
 }
@@ -1580,13 +1580,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_VAR_OFFSET>{LNUM}|{HNUM}|{BNUM} { /* Offset must be treated as a string */
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	return T_NUM_STRING;
 }
 
 <ST_IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
 	zendlval->value.dval = zend_strtod(yytext, NULL);
-	zendlval->type = IS_DOUBLE;
+	Z_TYPE_P(zendlval) = IS_DOUBLE;
 	return T_DNUMBER;
 }
 
@@ -1600,7 +1600,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		   at run-time */
 		zendlval->value.str.len = sizeof("__CLASS__")-1;
 		zendlval->value.str.val = estrndup("__CLASS__", zendlval->value.str.len);
-		zendlval->type = IS_CONSTANT;
+		Z_TYPE_P(zendlval) = IS_CONSTANT;
 	} else {
 		if (CG(active_class_entry)) {
 			class_name = CG(active_class_entry)->name;
@@ -1612,7 +1612,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		
 		zendlval->value.str.len = strlen(class_name);
 		zendlval->value.str.val = estrndup(class_name, zendlval->value.str.len);
-		zendlval->type = IS_STRING;
+		Z_TYPE_P(zendlval) = IS_STRING;
 	}
 	return T_CLASS_C;
 }
@@ -1632,7 +1632,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	
 	zendlval->value.str.len = strlen(trait_name);
 	zendlval->value.str.val = estrndup(trait_name, zendlval->value.str.len);
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	
 	return T_TRAIT_C;
 }
@@ -1649,7 +1649,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 	zendlval->value.str.len = strlen(func_name);
 	zendlval->value.str.val = estrndup(func_name, zendlval->value.str.len);
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	return T_FUNC_C;
 }
 
@@ -1670,13 +1670,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		class_name && func_name ? "::" : "",
 		func_name ? func_name : ""
 		);
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	return T_METHOD_C;
 }
 
 <ST_IN_SCRIPTING>"__LINE__" {
 	zendlval->value.lval = CG(zend_lineno);
-	zendlval->type = IS_LONG;
+	Z_TYPE_P(zendlval) = IS_LONG;
 	return T_LINE;
 }
 
@@ -1688,7 +1688,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 	zendlval->value.str.len = strlen(filename);
 	zendlval->value.str.val = estrndup(filename, zendlval->value.str.len);
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	return T_FILE;
 }
 
@@ -1715,7 +1715,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 	zendlval->value.str.len = strlen(dirname);
 	zendlval->value.str.val = dirname;
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	return T_DIR;
 }
 
@@ -1741,7 +1741,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	HANDLE_NEWLINES(yytext, yyleng);
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG;
 }
@@ -1751,7 +1751,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (CG(asp_tags)) {
 		zendlval->value.str.val = yytext; /* no copying - intentional */
 		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
+		Z_TYPE_P(zendlval) = IS_STRING;
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG_WITH_ECHO;
 	} else {
@@ -1763,7 +1763,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <INITIAL>"<?=" {
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG_WITH_ECHO;
 }
@@ -1773,7 +1773,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (CG(asp_tags)) {
 		zendlval->value.str.val = yytext; /* no copying - intentional */
 		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
+		Z_TYPE_P(zendlval) = IS_STRING;
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
@@ -1785,7 +1785,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <INITIAL>"<?php"([ \t]|{NEWLINE}) {
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG;
@@ -1796,7 +1796,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (CG(short_tags)) {
 		zendlval->value.str.val = yytext; /* no copying - intentional */
 		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
+		Z_TYPE_P(zendlval) = IS_STRING;
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
@@ -1859,7 +1859,7 @@ inline_html:
 	  zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	  zendlval->value.str.len = yyleng;
 	}
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 	return T_INLINE_HTML;
 }
@@ -1872,7 +1872,7 @@ inline_html:
 	yyless(yyleng - 3);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY TSRMLS_CC);
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	return T_VARIABLE;
 }
 
@@ -1882,13 +1882,13 @@ inline_html:
 	yyless(yyleng - 1);
 	yy_push_state(ST_VAR_OFFSET TSRMLS_CC);
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	return T_VARIABLE;
 }
 
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$"{LABEL} {
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	return T_VARIABLE;
 }
 
@@ -1911,7 +1911,7 @@ inline_html:
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{LABEL} {
 	zend_copy_value(zendlval, yytext, yyleng);
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	return T_STRING;
 }
 
@@ -1987,7 +1987,7 @@ inline_html:
 <ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">"){NEWLINE}? {
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	BEGIN(INITIAL);
 	return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 }
@@ -1997,7 +1997,7 @@ inline_html:
 	if (CG(asp_tags)) {
 		BEGIN(INITIAL);
 		zendlval->value.str.len = yyleng;
-		zendlval->type = IS_STRING;
+		Z_TYPE_P(zendlval) = IS_STRING;
 		zendlval->value.str.val = yytext; /* no copying - intentional */
 		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 	} else {
@@ -2034,7 +2034,7 @@ inline_html:
 
 	zendlval->value.str.val = estrndup(yytext+bprefix+1, yyleng-bprefix-2);
 	zendlval->value.str.len = yyleng-bprefix-2;
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 
 	/* convert escape sequences */
 	s = t = zendlval->value.str.val;
@@ -2423,7 +2423,7 @@ nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
 	zend_copy_value(zendlval, yytext, yyleng - newline);
-	zendlval->type = IS_STRING;
+	Z_TYPE_P(zendlval) = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng - newline);
 	return T_ENCAPSED_AND_WHITESPACE;
 }

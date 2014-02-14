@@ -83,7 +83,7 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE
 
 	php_libxml_increment_node_ptr((php_libxml_node_object *)subnode, node, NULL TSRMLS_CC);
 
-	value->type = IS_OBJECT;
+	Z_TYPE_P(value) = IS_OBJECT;
 	value->value.obj = php_sxe_register_object(subnode TSRMLS_CC);
 }
 /* }}} */
@@ -1026,7 +1026,7 @@ static void _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval 
 		}
 		php_libxml_increment_node_ptr((php_libxml_node_object *)subnode, node, NULL TSRMLS_CC);
 
-		(*value)->type = IS_OBJECT;
+		Z_TYPE_PP(value) = IS_OBJECT;
 		(*value)->value.obj = php_sxe_register_object(subnode TSRMLS_CC);
 		/*zval_add_ref(value);*/
 	}
@@ -2183,7 +2183,7 @@ PHP_FUNCTION(simplexml_load_file)
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp TSRMLS_CC);
 	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL TSRMLS_CC);
 
-	return_value->type = IS_OBJECT;
+	Z_TYPE_P(return_value) = IS_OBJECT;
 	return_value->value.obj = php_sxe_register_object(sxe TSRMLS_CC);
 }
 /* }}} */
@@ -2221,7 +2221,7 @@ PHP_FUNCTION(simplexml_load_string)
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp TSRMLS_CC);
 	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL TSRMLS_CC);
 
-	return_value->type = IS_OBJECT;
+	Z_TYPE_P(return_value) = IS_OBJECT;
 	return_value->value.obj = php_sxe_register_object(sxe TSRMLS_CC);
 }
 /* }}} */
@@ -2479,7 +2479,7 @@ PHP_FUNCTION(simplexml_import_dom)
 		php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, nodep->doc TSRMLS_CC);
 		php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, nodep, NULL TSRMLS_CC);
 
-		return_value->type = IS_OBJECT;
+		Z_TYPE_P(return_value) = IS_OBJECT;
 		return_value->value.obj = php_sxe_register_object(sxe TSRMLS_CC);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Nodetype to import");

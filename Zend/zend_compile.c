@@ -160,7 +160,7 @@ static void build_runtime_defined_function_key(zval *result, const char *name, i
  	result->value.str.val[0] = '\0';
  	sprintf(result->value.str.val+1, "%s%s%s", name, filename, char_pos_buf);
 
-	result->type = IS_STRING;
+	Z_TYPE_P(result) = IS_STRING;
 	Z_SET_REFCOUNT_P(result, 1);
 }
 /* }}} */
@@ -1891,8 +1891,8 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 	if (class_type->op_type != IS_UNUSED) {
 		cur_arg_info->allow_null = 0;
 
-		if (class_type->u.constant.type != IS_NULL) {
-			if (class_type->u.constant.type == IS_ARRAY) {
+		if (Z_TYPE(class_type->u.constant) != IS_NULL) {
+			if (Z_TYPE(class_type->u.constant) == IS_ARRAY) {
 				cur_arg_info->type_hint = IS_ARRAY;
 				if (op == ZEND_RECV_INIT) {
 					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"))) {
@@ -1901,7 +1901,7 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 						zend_error(E_COMPILE_ERROR, "Default value for parameters with array type hint can only be an array or NULL");
 					}
 				}
-			} else if (class_type->u.constant.type == IS_CALLABLE) {
+			} else if (Z_TYPE(class_type->u.constant) == IS_CALLABLE) {
 				cur_arg_info->type_hint = IS_CALLABLE;
 				if (op == ZEND_RECV_INIT) {
 					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"))) {
@@ -5576,7 +5576,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 				}
 				zend_do_build_full_name(NULL, constant_container, constant_name, 1 TSRMLS_CC);
 				*result = *constant_container;
-				result->u.constant.type = IS_CONSTANT | fetch_type;
+				Z_TYPE(result->u.constant) = IS_CONSTANT | fetch_type;
 				break;
 			case ZEND_RT:
 				if (constant_container->op_type == IS_CONST &&
@@ -5626,7 +5626,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 			}
 
 			*result = *constant_name;
-			result->u.constant.type = IS_CONSTANT | fetch_type;
+			Z_TYPE(result->u.constant) = IS_CONSTANT | fetch_type;
 			break;
 		case ZEND_RT:
 			compound = memchr(Z_STRVAL(constant_name->u.constant), '\\', Z_STRLEN(constant_name->u.constant));
@@ -5774,7 +5774,7 @@ void zend_do_add_static_array_element(znode *result, znode *offset, const znode 
 	ALLOC_ZVAL(element);
 	*element = expr->u.constant;
 	if (offset) {
-		switch (offset->u.constant.type & IS_CONSTANT_TYPE_MASK) {
+		switch (Z_TYPE(offset->u.constant) & IS_CONSTANT_TYPE_MASK) {
 			case IS_CONSTANT:
 				/* Ugly hack to denote that this value has a constant index */
 				Z_TYPE_P(element) |= IS_CONSTANT_INDEX;

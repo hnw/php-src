@@ -77,7 +77,7 @@ static int forget_persistent_resource_id_numbers(zend_rsrc_list_entry *rsrc TSRM
 {
 	php_stream *stream;
 
-	if (Z_TYPE_P(rsrc) != le_pstream) {
+	if (rsrc->type != le_pstream) {
 		return 0;
 	}
 
@@ -119,7 +119,7 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 	zend_rsrc_list_entry *le;
 
 	if (zend_hash_find(&EG(persistent_list), (char*)persistent_id, strlen(persistent_id)+1, (void*) &le) == SUCCESS) {
-		if (Z_TYPE_P(le) == le_pstream) {
+		if (le->type == le_pstream) {
 			if (stream) {
 				HashPosition pos;
 				zend_rsrc_list_entry *regentry;
@@ -317,7 +317,7 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 	if (persistent_id) {
 		zend_rsrc_list_entry le;
 
-		Z_TYPE(le) = le_pstream;
+		le.type = le_pstream;
 		le.ptr = ret;
 		le.refcount = 0;
 

@@ -3807,8 +3807,7 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 		if (*property != value) {
 			if (PZVAL_IS_REF(*property)) {
 				zval_dtor(*property);
-				Z_TYPE_PP(property) = Z_TYPE_P(value);
-				(*property)->value = value->value;
+				ZVAL_COPY_VALUE(*property, value);
 				if (Z_REFCOUNT_P(value) > 0) {
 					zval_copy_ctor(*property);
 				} else {

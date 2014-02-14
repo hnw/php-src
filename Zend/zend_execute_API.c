@@ -542,7 +542,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					efree(save);
 				}
 				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
-				p->type = IS_STRING;
+				Z_TYPE_P(p) = IS_STRING;
 				if (!inline_change) {
 					Z_STRVAL_P(p) = actual;
 					Z_STRLEN_P(p) = actual_len;

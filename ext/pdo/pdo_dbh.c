@@ -300,7 +300,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		if (is_persistent) {
 			/* let's see if we have one cached.... */
 			if (SUCCESS == zend_hash_find(&EG(persistent_list), hashkey, plen+1, (void*)&le)) {
-				if (Z_TYPE_P(le) == php_pdo_list_entry()) {
+				if (le->type == php_pdo_list_entry()) {
 					pdbh = (pdo_dbh_t*)le->ptr;
 
 					/* is the connection still alive ? */

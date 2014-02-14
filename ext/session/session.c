@@ -78,7 +78,7 @@ zend_class_entry *php_session_id_iface_entry;
    *********** */
 
 #define IF_SESSION_VARS() \
-	if (PS(http_session_vars) && PS(http_session_vars)->type == IS_ARRAY)
+	if (PS(http_session_vars) && Z_TYPE_P(PS(http_session_vars)) == IS_ARRAY)
 
 #define SESSION_CHECK_ACTIVE_STATE	\
 	if (PS(session_status) == php_session_active) {	\

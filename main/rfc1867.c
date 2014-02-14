@@ -1212,15 +1212,15 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				zval file_size, error_type;
 
 				error_type.value.lval = cancel_upload;
-				error_type.type = IS_LONG;
+				Z_TYPE(error_type) = IS_LONG;
 
 				/* Add $foo[error] */
 				if (cancel_upload) {
 					file_size.value.lval = 0;
-					file_size.type = IS_LONG;
+					Z_TYPE(file_size) = IS_LONG;
 				} else {
 					file_size.value.lval = total_bytes;
-					file_size.type = IS_LONG;
+					Z_TYPE(file_size) = IS_LONG;
 				}
 
 				if (is_arr_upload) {

@@ -312,7 +312,7 @@ static zval **dom_get_property_ptr_ptr(zval *object, zval *member, int type, con
 	zend_object_handlers *std_hnd;
 	int ret = FAILURE;
 
- 	if (member->type != IS_STRING) {
+ 	if (Z_TYPE_P(member) != IS_STRING) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
 		convert_to_string(&tmp_member);
@@ -346,7 +346,7 @@ zval *dom_read_property(zval *object, zval *member, int type, const zend_literal
 	zend_object_handlers *std_hnd;
 	int ret;
 
- 	if (member->type != IS_STRING) {
+ 	if (Z_TYPE_P(member) != IS_STRING) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
 		convert_to_string(&tmp_member);
@@ -391,7 +391,7 @@ void dom_write_property(zval *object, zval *member, zval *value, const zend_lite
 	zend_object_handlers *std_hnd;
 	int ret;
 
- 	if (member->type != IS_STRING) {
+ 	if (Z_TYPE_P(member) != IS_STRING) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
 		convert_to_string(&tmp_member);
@@ -426,7 +426,7 @@ static int dom_property_exists(zval *object, zval *member, int check_empty, cons
 	zend_object_handlers *std_hnd;
 	int ret, retval=0;
 
- 	if (member->type != IS_STRING) {
+ 	if (Z_TYPE_P(member) != IS_STRING) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
 		convert_to_string(&tmp_member);
@@ -1119,7 +1119,7 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 	mapptr = (dom_nnodemap_object *)intern->ptr;
 	if (basenode) {
 		MAKE_STD_ZVAL(baseobj);
-		baseobj->type = IS_OBJECT;
+		Z_TYPE_P(baseobj) = IS_OBJECT;
 		Z_SET_ISREF_P(baseobj);
 		baseobj->value.obj.handle = basenode->handle;
 		baseobj->value.obj.handlers = dom_get_obj_handlers(TSRMLS_C);
@@ -1333,7 +1333,7 @@ PHP_DOM_EXPORT zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *ret
 	}
 
 	if ((intern = (dom_object *) php_dom_object_get_data((void *) obj))) {
-		return_value->type = IS_OBJECT;
+		Z_TYPE_P(return_value) = IS_OBJECT;
 		Z_SET_ISREF_P(return_value);
 		return_value->value.obj.handle = intern->handle;
 		return_value->value.obj.handlers = dom_get_obj_handlers(TSRMLS_C);
@@ -1414,7 +1414,7 @@ PHP_DOM_EXPORT zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *ret
 			break;
 		}
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported node type: %d", Z_TYPE_P(obj));
+			//php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported node type: %d", Z_TYPE_P(obj));
 			ZVAL_NULL(wrapper);
 			return wrapper;
 	}

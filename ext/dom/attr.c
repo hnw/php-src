@@ -183,7 +183,7 @@ int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 		node_list_unlink(attrp->children TSRMLS_CC);
 	}
 
-	if (newval->type != IS_STRING) {
+	if (Z_TYPE_P(newval) != IS_STRING) {
 		if(Z_REFCOUNT_P(newval) > 1) {
 			value_copy = *newval;
 			zval_copy_ctor(&value_copy);

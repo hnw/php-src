@@ -343,7 +343,7 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 	case IS_DOUBLE:
 	case IS_BOOL:
 	case IS_LONG:
-		if (offset->type == IS_DOUBLE) {
+		if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			index = (long)Z_DVAL_P(offset);
 		} else {
 			index = Z_LVAL_P(offset);
@@ -474,7 +474,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 			return;
 		}
-		if (offset->type == IS_DOUBLE) {
+		if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			index = (long)Z_DVAL_P(offset);
 		} else {
 			index = Z_LVAL_P(offset);
@@ -563,7 +563,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 	case IS_RESOURCE:
 	case IS_BOOL:
 	case IS_LONG:
-		if (offset->type == IS_DOUBLE) {
+		if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			index = (long)Z_DVAL_P(offset);
 		} else {
 			index = Z_LVAL_P(offset);
@@ -631,7 +631,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 		case IS_LONG:
 			{
 				HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
-				if (offset->type == IS_DOUBLE) {
+				if (Z_TYPE_P(offset) == IS_DOUBLE) {
 					index = (long)Z_DVAL_P(offset);
 				} else {
 					index = Z_LVAL_P(offset);
@@ -1308,7 +1308,7 @@ SPL_METHOD(Array, getIterator)
 		return;
 	}
 
-	return_value->type = IS_OBJECT;
+	Z_TYPE_P(return_value) = IS_OBJECT;
 	return_value->value.obj = spl_array_object_new_ex(intern->ce_get_iterator, &iterator, object, 0 TSRMLS_CC);
 	Z_SET_REFCOUNT_P(return_value, 1);
 	Z_SET_ISREF_P(return_value);

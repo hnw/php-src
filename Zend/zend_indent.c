@@ -60,14 +60,14 @@ ZEND_API void zend_indent()
 	memset(emit_whitespace, 0, sizeof(int)*256);
 
 	/* highlight stuff coming back from zendlex() */
-	token.type = 0;
+	Z_TYPE(token) = IS_NULL;
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
 				zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				break;
 			case T_WHITESPACE: {
-					token.type = 0;
+					Z_TYPE(token) = IS_NULL;
 					/* eat whitespace, emit newlines */
 					for (i=0; i<LANG_SCNG(yy_leng); i++) {
 						emit_whitespace[(unsigned char) LANG_SCNG(yy_text)[i]]++;
@@ -79,7 +79,7 @@ ZEND_API void zend_indent()
 				in_string = !in_string;
 				/* break missing intentionally */
 			default:
-				if (token.type==0) {
+				if (Z_TYPE(token) == IS_NULL) {
 					/* keyword */
 					switch (token_type) {
 						case ',':
@@ -132,7 +132,7 @@ dflt_printout:
 				}
 				break;
 		}
-		if (token.type == IS_STRING) {
+		if (Z_TYPE(token) == IS_STRING) {
 			switch (token_type) {
 			case T_OPEN_TAG:
 			case T_CLOSE_TAG:
@@ -143,7 +143,7 @@ dflt_printout:
 				break;
 			}
 		}
-		token.type = 0;
+		Z_TYPE(token) = IS_NULL;
 	}
 }
 

@@ -557,8 +557,8 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 				zval garbage = **variable_ptr; /* old value should be destroyed */
 
 				/* To check: can't *variable_ptr be some system variable like error_zval here? */
-				Z_TYPE_PP(variable_ptr) = Z_TYPE_P(value);
-				(*variable_ptr)->value = value->value;
+				ZVAL_COPY_VALUE(*variable_ptr, value);
+
 				if (Z_REFCOUNT_P(value) > 0) {
 					zval_copy_ctor(*variable_ptr);
 				} else {

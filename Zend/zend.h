@@ -324,17 +324,25 @@ typedef union _zvalue_value {
 	struct {
 		char *val;
 		int len;
+		zend_uchar dummy[4];
 	} str;
 	HashTable *ht;				/* hash table value */
 	zend_object_value obj;
 } zvalue_value;
 
-struct _zval_struct {
+union _zval_struct {
 	/* Variable information */
 	zvalue_value value;		/* value */
-	zend_uint refcount__gc;
-	zend_uchar type;	/* active type */
-	zend_uchar is_ref__gc;
+	struct {
+		void *dummy1;
+		int dummy2;
+		zend_uint refcount__gc;
+	} refinfo;
+	struct {
+		void *dummy1;
+		int dummy2;
+		zend_uchar var[4];
+	} typeinfo;
 };
 
 #define Z_REFCOUNT_PP(ppz)		Z_REFCOUNT_P(*(ppz))
@@ -394,35 +402,44 @@ struct _zval_struct {
 #endif
 
 static zend_always_inline zend_uint zval_refcount_p(zval* pz) {
-	return pz->refcount__gc;
+	return (pz->refinfo.refcount__gc >> 9);
 }
 
 static zend_always_inline zend_uint zval_set_refcount_p(zval* pz, zend_uint rc) {
-	return pz->refcount__gc = rc;
+	pz->refinfo.refcount__gc = ((pz->refinfo.refcount__gc & 0x1ff) | (rc << 9));
+	return rc;
 }
 
 static zend_always_inline zend_uint zval_addref_p(zval* pz) {
-	return ++pz->refcount__gc;
+	pz->refinfo.refcount__gc += 0x200;
+	return (pz->refinfo.refcount__gc >> 9);
 }
 
 static zend_always_inline zend_uint zval_delref_p(zval* pz) {
-	return --pz->refcount__gc;
+	pz->refinfo.refcount__gc -= 0x200;
+	return (pz->refinfo.refcount__gc >> 9);
 }
 
 static zend_always_inline zend_bool zval_isref_p(zval* pz) {
-	return pz->is_ref__gc;
+#ifdef WORDS_BIGENDIAN
+	return (pz->typeinfo.var[2]) & 1;
+#else
+	return (pz->typeinfo.var[1]) & 1;
+#endif
 }
 
 static zend_always_inline zend_bool zval_set_isref_p(zval* pz) {
-	return pz->is_ref__gc = 1;
+	pz->refinfo.refcount__gc |= 0x100;
+	return 1;
 }
 
 static zend_always_inline zend_bool zval_unset_isref_p(zval* pz) {
-	return pz->is_ref__gc = 0;
+	pz->refinfo.refcount__gc &= 0xfffffeff;
+	return 0;
 }
 
 static zend_always_inline zend_bool zval_set_isref_to_p(zval* pz, zend_bool isref) {
-	return pz->is_ref__gc = isref;
+	return isref ? zval_set_isref_p(pz) : zval_unset_isref_p(pz);
 }
 
 /* excpt.h on Digital Unix 4.0 defines function_table */
@@ -739,8 +756,7 @@ END_EXTERN_C()
 #define ZMSG_MEMORY_LEAKS_GRAND_TOTAL	7L
 
 #define INIT_PZVAL(z)		\
-	(z)->refcount__gc = 1;	\
-	(z)->is_ref__gc = 0;
+	(z)->refinfo.refcount__gc = (((z)->refinfo.refcount__gc & 0xff) | 0x200);
 
 #define INIT_ZVAL(z) z = zval_used_for_init;
 
@@ -756,8 +772,9 @@ END_EXTERN_C()
 
 #define ZVAL_COPY_VALUE(z, v)					\
 	do {										\
+		zend_uint i = (z)->refinfo.refcount__gc & 0xffffff00;	\
 		(z)->value = (v)->value;				\
-		Z_TYPE_P(z) = Z_TYPE_P(v);				\
+		(z)->refinfo.refcount__gc = i | Z_TYPE_P(v);	\
 	} while (0)
 
 #define INIT_PZVAL_COPY(z, v)					\

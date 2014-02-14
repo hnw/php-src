@@ -127,18 +127,18 @@ void zend_register_standard_constants(TSRMLS_D)
 		c.name = zend_strndup(ZEND_STRL("TRUE"));
 		c.name_len = sizeof("TRUE");
 		c.value.value.lval = 1;
-		c.value.type = IS_BOOL;
+		Z_TYPE(c.value) = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
 		
 		c.name = zend_strndup(ZEND_STRL("FALSE"));
 		c.name_len = sizeof("FALSE");
 		c.value.value.lval = 0;
-		c.value.type = IS_BOOL;
+		Z_TYPE(c.value) = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
 
 		c.name = zend_strndup(ZEND_STRL("NULL"));
 		c.name_len = sizeof("NULL");
-		c.value.type = IS_NULL;
+		Z_TYPE(c.value) = IS_NULL;
 		zend_register_constant(&c TSRMLS_CC);
 
 		c.flags = CONST_PERSISTENT | CONST_CS;
@@ -146,13 +146,13 @@ void zend_register_standard_constants(TSRMLS_D)
 		c.name = zend_strndup(ZEND_STRL("ZEND_THREAD_SAFE"));
 		c.name_len = sizeof("ZEND_THREAD_SAFE");
 		c.value.value.lval = ZTS_V;
-		c.value.type = IS_BOOL;
+		Z_TYPE(c.value) = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
 
 		c.name = zend_strndup(ZEND_STRL("ZEND_DEBUG_BUILD"));
 		c.name_len = sizeof("ZEND_DEBUG_BUILD");
 		c.value.value.lval = ZEND_DEBUG;
-		c.value.type = IS_BOOL;
+		Z_TYPE(c.value) = IS_BOOL;
 		zend_register_constant(&c TSRMLS_CC);
 	}
 }
@@ -180,7 +180,7 @@ ZEND_API void zend_register_long_constant(const char *name, uint name_len, long 
 {
 	zend_constant c;
 	
-	c.value.type = IS_LONG;
+	Z_TYPE(c.value) = IS_LONG;
 	c.value.value.lval = lval;
 	c.flags = flags;
 	c.name = zend_strndup(name, name_len-1);
@@ -194,7 +194,7 @@ ZEND_API void zend_register_double_constant(const char *name, uint name_len, dou
 {
 	zend_constant c;
 	
-	c.value.type = IS_DOUBLE;
+	Z_TYPE(c.value) = IS_DOUBLE;
 	c.value.value.dval = dval;
 	c.flags = flags;
 	c.name = zend_strndup(name, name_len-1);
@@ -208,7 +208,7 @@ ZEND_API void zend_register_stringl_constant(const char *name, uint name_len, ch
 {
 	zend_constant c;
 	
-	c.value.type = IS_STRING;
+	Z_TYPE(c.value) = IS_STRING;
 	c.value.value.str.val = strval;
 	c.value.value.str.len = strlen;
 	c.flags = flags;

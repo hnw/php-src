@@ -122,7 +122,7 @@ zval **xmlreader_get_property_ptr_ptr(zval *object, zval *member, int type, cons
 	zend_object_handlers *std_hnd;
 	int ret = FAILURE;
 
- 	if (member->type != IS_STRING) {
+ 	if (Z_TYPE_P(member) != IS_STRING) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
 		convert_to_string(&tmp_member);
@@ -156,7 +156,7 @@ zval *xmlreader_read_property(zval *object, zval *member, int type, const zend_l
 	zend_object_handlers *std_hnd;
 	int ret;
 
- 	if (member->type != IS_STRING) {
+ 	if (Z_TYPE_P(member) != IS_STRING) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
 		convert_to_string(&tmp_member);
@@ -198,7 +198,7 @@ void xmlreader_write_property(zval *object, zval *member, zval *value, const zen
 	zend_object_handlers *std_hnd;
 	int ret;
 
- 	if (member->type != IS_STRING) {
+ 	if (Z_TYPE_P(member) != IS_STRING) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
 		convert_to_string(&tmp_member);
